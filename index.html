@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOUZA FARMA - Sistema Pro</title>
+    <title>SOUZA FARMA - Sistema de Consulta</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
@@ -11,50 +11,74 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     
     <style>
-        :root { --vermelho: #e30613; --amarelo: #ffca05; --azul: #003399; --cinza: #f4f4f4; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--cinza); padding-bottom: 50px; }
-        
-        /* CABEÇALHO COMPLETO */
-        .header { background: white; text-align: center; padding: 20px; border-bottom: 6px solid var(--vermelho); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .logo { max-width: 180px; margin-bottom: 10px; }
-        .header h1 { color: var(--vermelho); margin: 5px 0; font-size: 28px; font-weight: 800; }
-        .header p { margin: 3px 0; color: #333; font-size: 14px; }
-        .slogan { font-weight: bold; color: var(--azul); margin-top: 8px !important; font-size: 15px !important; }
+        :root { 
+            --vermelho: #e30613; 
+            --amarelo: #ffca05; 
+            --azul: #003399; 
+            --cinza-fundo: #f4f4f4;
+            --preto-relogio: #222;
+        }
 
-        /* RELÓGIO E DATA ATUAL */
-        .live-clock { background: #333; color: white; text-align: center; padding: 5px; font-size: 13px; font-family: monospace; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--cinza-fundo); padding-bottom: 50px; }
+        
+        /* BARRA DE RELÓGIO ONLINE */
+        .live-clock-bar { 
+            background: var(--preto-relogio); 
+            color: var(--amarelo); 
+            text-align: center; 
+            padding: 8px; 
+            font-size: 14px; 
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* CABEÇALHO COMPLETO */
+        .header { background: white; text-align: center; padding: 25px 15px; border-bottom: 6px solid var(--vermelho); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .logo { max-width: 200px; margin-bottom: 10px; }
+        .header h1 { color: var(--vermelho); margin: 5px 0; font-size: 30px; font-weight: 800; text-transform: uppercase; }
+        .header p { margin: 3px 0; color: #333; font-size: 14px; line-height: 1.4; }
+        .slogan { font-weight: bold; color: var(--azul); margin-top: 10px !important; font-size: 16px !important; }
 
         .container { max-width: 900px; margin: 0 auto; padding: 15px; }
 
-        .tabs { display: flex; justify-content: center; margin-bottom: 15px; gap: 8px; }
-        .tab-btn { padding: 12px; border: none; background: #ccc; cursor: pointer; font-weight: bold; border-radius: 5px; flex: 1; }
-        .tab-btn.active { background: var(--vermelho); color: white; }
+        /* NAVEGAÇÃO POR ABAS */
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; }
+        .tab-btn { padding: 14px; border: none; background: #ccc; cursor: pointer; font-weight: bold; border-radius: 8px; flex: 1; font-size: 15px; transition: 0.3s; }
+        .tab-btn.active { background: var(--vermelho); color: white; box-shadow: 0 4px 8px rgba(227, 6, 19, 0.3); }
 
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* BUSCA E SCANNER */
-        .search-area { display: flex; gap: 8px; background: var(--amarelo); padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .search-area input { flex: 1; padding: 12px; font-size: 18px; border-radius: 5px; border: none; outline: none; }
-        .btn-scan { background: var(--azul); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        /* ÁREA DE BUSCA */
+        .search-area { display: flex; gap: 10px; background: var(--amarelo); padding: 18px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .search-area input { flex: 1; padding: 15px; font-size: 20px; border-radius: 8px; border: none; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-scan { background: var(--azul); color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-size: 24px; transition: 0.2s; }
+        .btn-scan:active { transform: scale(0.95); }
 
-        #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 15px; border: 2px solid var(--azul); display: none; }
+        /* SCANNER */
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 3px solid var(--azul); display: none; background: #000; }
 
-        /* TABELA */
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        td { padding: 15px; border-bottom: 1px solid #ddd; }
-        .info-prod { font-weight: bold; font-size: 17px; color: #000; display: block; }
-        .info-lab { color: #666; font-size: 13px; font-style: italic; }
-        .preco { color: var(--vermelho); font-weight: bold; font-size: 24px; text-align: right; }
-        
-        .last-update { font-size: 11px; color: #777; text-align: center; margin-bottom: 10px; }
-        .card-adm { background: white; padding: 25px; border-radius: 10px; text-align: center; border: 1px solid #ddd; }
-        .btn-adm { padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; margin: 5px; }
+        /* TABELA DE RESULTADOS */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        th { background: #333; color: white; padding: 12px; text-align: left; font-size: 13px; }
+        td { padding: 16px; border-bottom: 1px solid #eee; }
+        .info-prod { font-weight: bold; font-size: 18px; color: #111; display: block; margin-bottom: 4px; }
+        .info-lab { color: #666; font-size: 14px; font-style: italic; }
+        .info-cod { font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #999; margin-top: 5px; display: block; }
+        .preco { color: var(--vermelho); font-weight: bold; font-size: 26px; text-align: right; }
+
+        /* ABA CADASTRO */
+        .card-adm { background: white; padding: 35px; border-radius: 12px; text-align: center; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .btn-adm { padding: 15px 25px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; margin: 10px; font-size: 16px; }
+        .last-sync { font-size: 12px; color: #666; margin-bottom: 15px; text-align: center; font-style: italic; }
     </style>
 </head>
 <body>
 
-<div class="live-clock" id="relogio">--/--/---- 00:00:00</div>
+<div class="live-clock-bar" id="relogioOnline">CARREGANDO DATA E HORA...</div>
 
 <div class="header">
     <img src="Souza-Farma-logomarca.png" alt="Souza Farma" class="logo">
@@ -65,41 +89,50 @@
 </div>
 
 <div class="container">
-    <div id="dataAtualizacao" class="last-update">Sincronizando...</div>
+    <div id="statusSync" class="last-sync">Sincronizando com a nuvem...</div>
     
     <div class="tabs">
-        <button id="btn-consulta" class="tab-btn active" onclick="mudarAba('aba-consulta')">🔎 CONSULTA</button>
-        <button id="btn-cadastro" class="tab-btn" onclick="acessarCadastro()">⚙️ CADASTRO</button>
+        <button id="btn-consulta" class="tab-btn active" onclick="mudarAba('aba-consulta')">🔎 CONSULTAR PREÇO</button>
+        <button id="btn-cadastro" class="tab-btn" onclick="acessoSeguroCadastro()">⚙️ CADASTRO / ADM</button>
     </div>
 
     <div id="aba-consulta" class="tab-content active">
-        <div id="reader"></div> 
-        
-        <div class="search-area">
-            <input type="text" id="searchInput" placeholder="Nome ou Código..." onkeyup="buscar()">
-            <button class="btn-scan" onclick="alternarScanner()">📷</button>
+        <div id="reader"></div> <div class="search-area">
+            <input type="text" id="searchInput" placeholder="Nome do remédio ou código..." onkeyup="fazerBusca()">
+            <button class="btn-scan" onclick="alternarCamera()" title="Usar Câmera">📷</button>
         </div>
 
         <table>
-            <tbody id="corpoTabela"></tbody>
+            <thead>
+                <tr>
+                    <th>PRODUTO / DETALHES</th>
+                    <th style="text-align: right;">PREÇO</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela">
+                </tbody>
         </table>
-        <div id="msgAviso" style="text-align: center; padding: 30px; color: #888;">Digite o nome ou use a câmera para consultar.</div>
+        <div id="msgAviso" style="text-align: center; padding: 40px; color: #999; font-style: italic;">
+            Utilize a barra de busca acima para consultar.
+        </div>
     </div>
 
     <div id="aba-cadastro" class="tab-content">
         <div class="card-adm">
-            <h3>Painel Administrativo</h3>
-            <p>Suba o arquivo Excel para atualizar os preços na nuvem.</p>
-            <input type="file" id="fileInput" accept=".xlsx, .xls">
+            <h2 style="color: var(--azul);">Painel Administrativo</h2>
+            <p>Selecione o arquivo Excel atualizado para sincronizar com todos os dispositivos.</p>
+            <br>
+            <input type="file" id="fileInput" accept=".xlsx, .xls" style="font-size: 14px;">
             <br><br>
-            <button class="btn-adm" style="background: #28a745;" onclick="uploadParaFirebase()">🚀 Atualizar Preços Online</button>
-            <button class="btn-adm" style="background: #e30613;" onclick="limparFirebase()">🗑️ Limpar Tudo</button>
+            <button class="btn-adm" style="background: #28a745;" onclick="uploadExcelFirebase()">🚀 ATUALIZAR PREÇOS ONLINE</button>
+            <button class="btn-adm" style="background: var(--vermelho);" onclick="resetarBancoDados()">🗑️ LIMPAR BANCO ONLINE</button>
+            <div id="feedbackUpload" style="margin-top: 15px; font-weight: bold;"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURAÇÃO FIREBASE ---
+    // --- 1. CONFIGURAÇÃO FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyCRWJLxxDIhtOV3YVjX9qYCHYhsDYhsC9M",
         authDomain: "souza-farma-f6b8f.firebaseapp.com",
@@ -110,48 +143,64 @@
         appId: "1:532095190012:web:3f7422c5205f4bfddbe879"
     };
 
+    // Inicialização
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let listaProdutos = [];
-    let html5QrCode;
+    let scannerObjeto;
 
-    // --- RELÓGIO EM TEMPO REAL ---
-    function atualizarRelogio() {
-        const agora = new Date();
-        const texto = agora.toLocaleDateString('pt-BR') + " " + agora.toLocaleTimeString('pt-BR');
-        document.getElementById('relogio').innerText = texto;
+    // --- 2. RELÓGIO ONLINE EM TEMPO REAL ---
+    function iniciarRelogio() {
+        setInterval(() => {
+            const agora = new Date();
+            const formatado = agora.toLocaleDateString('pt-BR') + " | " + agora.toLocaleTimeString('pt-BR');
+            document.getElementById('relogioOnline').innerText = formatado;
+        }, 1000);
     }
-    setInterval(atualizarRelogio, 1000);
+    iniciarRelogio();
 
-    // --- SINCRONIZAÇÃO ---
+    // --- 3. SINCRONIZAÇÃO EM TEMPO REAL ---
     db.ref('/').on('value', (snapshot) => {
-        const data = snapshot.val();
-        listaProdutos = data.produtos || [];
-        document.getElementById('dataAtualizacao').innerText = `Última atualização da tabela: ${data.ultima_atualizacao || 'Sem dados'}`;
+        const dados = snapshot.val() || {};
+        listaProdutos = dados.produtos || [];
+        const dataF = dados.ultima_atualizacao || "Nunca";
+        document.getElementById('statusSync').innerText = `Última atualização da tabela: ${dataF}`;
     });
 
-    function mudarAba(id) {
-        if(html5QrCode) pararScanner();
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('btn-' + id.split('-')[1]).classList.add('active');
+    // --- 4. CONTROLE DE ABAS E SEGURANÇA ---
+    function mudarAba(idAba) {
+        if(scannerObjeto) fecharScanner(); // Fecha câmera ao mudar aba
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(idAba).classList.add('active');
+        const btnId = 'btn-' + idAba.split('-')[1];
+        document.getElementById(btnId).classList.add('active');
     }
 
-    function acessarCadastro() {
-        if (prompt("Senha ADM:") === "souza123") mudarAba('aba-cadastro');
-        else alert("Senha Incorreta");
+    function acessoSeguroCadastro() {
+        const pass = prompt("Digite a senha de administrador:");
+        if (pass === "souza123") {
+            mudarAba('aba-cadastro');
+        } else if (pass !== null) {
+            alert("Senha incorreta!");
+        }
     }
 
-    function buscar(valorOpcional) {
+    // --- 5. LÓGICA DE BUSCA ---
+    function fazerBusca(termoManual) {
         const input = document.getElementById('searchInput');
-        if(valorOpcional) input.value = valorOpcional;
+        if(termoManual) input.value = termoManual;
         
         const termo = input.value.toLowerCase();
         const corpo = document.getElementById('corpoTabela');
         const aviso = document.getElementById('msgAviso');
 
-        if (termo.length < 2) { corpo.innerHTML = ""; aviso.style.display = "block"; return; }
+        if (termo.length < 2) {
+            corpo.innerHTML = "";
+            aviso.style.display = "block";
+            return;
+        }
 
         const resultados = listaProdutos.filter(p => 
             String(p.nome).toLowerCase().includes(termo) || 
@@ -160,93 +209,111 @@
         );
 
         aviso.style.display = "none";
-        corpo.innerHTML = resultados.slice(0, 40).map(p => `
+        corpo.innerHTML = resultados.slice(0, 50).map(p => `
             <tr>
                 <td>
                     <span class="info-prod">${p.nome}</span>
-                    <span class="info-lab">${p.lab || '-'} | Cód: ${p.id}</span>
+                    <span class="info-lab">${p.lab || 'Laboratório não informado'}</span>
+                    <span class="info-cod">Barras: ${p.barras} | ID: ${p.id}</span>
                 </td>
                 <td class="preco">R$ ${p.preco}</td>
             </tr>
         `).join('');
     }
 
-    // --- LÓGICA DO SCANNER (MELHORADA) ---
-    function alternarScanner() {
+    // --- 6. LEITOR DE CÓDIGO DE BARRAS (SCANNER) ---
+    function alternarCamera() {
         const readerDiv = document.getElementById('reader');
         if (readerDiv.style.display === 'block') {
-            pararScanner();
+            fecharScanner();
         } else {
             readerDiv.style.display = 'block';
-            html5QrCode = new Html5Qrcode("reader");
+            scannerObjeto = new Html5Qrcode("reader");
             const config = { 
                 fps: 20, 
-                qrbox: { width: 280, height: 160 }, // Área maior para código de barras
+                qrbox: { width: 300, height: 180 }, // Foco retangular para barras
                 aspectRatio: 1.0 
             };
             
-            html5QrCode.start(
+            scannerObjeto.start(
                 { facingMode: "environment" }, 
                 config,
-                (decodedText) => {
-                    buscar(decodedText);
-                    pararScanner();
-                    // Feedback tátil (vibra se o celular suportar)
+                (codigoLido) => {
+                    fazerBusca(codigoLido);
+                    fecharScanner();
                     if(navigator.vibrate) navigator.vibrate(100);
                 }
-            ).catch(err => console.error(err));
+            ).catch(err => alert("Câmera não disponível ou permissão negada."));
         }
     }
 
-    function pararScanner() {
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
+    function fecharScanner() {
+        if (scannerObjeto) {
+            scannerObjeto.stop().then(() => {
                 document.getElementById('reader').style.display = 'none';
             });
         }
     }
 
-    // --- UPLOAD FIREBASE ---
-    function uploadParaFirebase() {
-        const file = document.getElementById('fileInput').files[0];
-        if (!file) return alert("Selecione o arquivo!");
+    // --- 7. UPLOAD DE EXCEL ---
+    function uploadExcelFirebase() {
+        const fileInput = document.getElementById('fileInput');
+        const feedback = document.getElementById('feedbackUpload');
+        const file = fileInput.files[0];
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
-            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        if (!file) return alert("Selecione um arquivo Excel (.xlsx)!");
 
-            const formatados = json.map(item => {
-                const getV = (keys) => {
-                    const k = Object.keys(item).find(key => keys.includes(key.toLowerCase().trim()));
-                    return k ? item[k] : "";
-                };
-                return {
-                    nome: getV(['nome', 'produto', 'descricao']),
-                    lab: getV(['laboratorio', 'lab', 'fabricante']),
-                    barras: getV(['codigo_barras', 'barras', 'ean']),
-                    id: getV(['codigo_interno', 'id', 'codigo']),
-                    preco: getV(['preco', 'valor', 'venda'])
-                };
-            });
+        feedback.innerHTML = "⏳ Processando dados, aguarde...";
+        feedback.style.color = "orange";
 
-            const agora = new Date();
-            const dataF = agora.toLocaleDateString('pt-BR') + " " + agora.toLocaleTimeString('pt-BR');
+        const leitor = new FileReader();
+        leitor.onload = function(e) {
+            try {
+                const dadosArray = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(dadosArray, {type: 'array'});
+                const planilha = workbook.Sheets[workbook.SheetNames[0]];
+                const rawJson = XLSX.utils.sheet_to_json(planilha);
 
-            db.ref('/').set({
-                produtos: formatados,
-                ultima_atualizacao: dataF
-            }).then(() => {
-                alert("✅ Sistema atualizado com sucesso!");
-                document.getElementById('fileInput').value = "";
-            });
+                const listaFinal = rawJson.map(item => {
+                    const buscaColuna = (listaNomes) => {
+                        const chaveEncontrada = Object.keys(item).find(k => listaNomes.includes(k.toLowerCase().trim()));
+                        return chaveEncontrada ? item[chaveEncontrada] : "";
+                    };
+                    return {
+                        nome: buscaColuna(['nome', 'produto', 'descricao', 'item']),
+                        lab: buscaColuna(['laboratorio', 'lab', 'fabricante', 'marca']),
+                        barras: buscaColuna(['codigo_barras', 'barras', 'ean', 'cod_barras']),
+                        id: buscaColuna(['codigo_interno', 'id', 'codigo', 'cod']),
+                        preco: buscaColuna(['preco', 'valor', 'venda', 'preço'])
+                    };
+                });
+
+                const agora = new Date();
+                const timestamp = agora.toLocaleDateString('pt-BR') + " " + agora.toLocaleTimeString('pt-BR');
+
+                db.ref('/').set({
+                    produtos: listaFinal,
+                    ultima_atualizacao: timestamp
+                }).then(() => {
+                    feedback.innerHTML = "✅ Dados sincronizados com sucesso na nuvem!";
+                    feedback.style.color = "green";
+                    fileInput.value = "";
+                });
+
+            } catch (erro) {
+                feedback.innerHTML = "❌ Erro ao ler Excel. Verifique o formato.";
+                feedback.style.color = "red";
+            }
         };
-        reader.readAsArrayBuffer(file);
+        leitor.readAsArrayBuffer(file);
     }
 
-    function limparFirebase() {
-        if (confirm("Isso apagará todos os produtos online. Confirma?")) db.ref('/').remove();
+    function resetarBancoDados() {
+        if (confirm("ATENÇÃO: Isso removerá todos os preços de todos os aparelhos. Confirma?")) {
+            db.ref('/').remove().then(() => alert("Banco de dados esvaziado."));
+        }
     }
 </script>
+
 </body>
 </html>
