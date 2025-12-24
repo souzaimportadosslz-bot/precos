@@ -19,7 +19,7 @@
             --preto-relogio: #222;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--cinza-fundo); padding-bottom: 50px; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--cinza-fundo); padding-bottom: 50px; }
         
         /* BARRA DE RELÓGIO ONLINE */
         .live-clock-bar { 
@@ -29,8 +29,7 @@
             padding: 8px; 
             font-size: 14px; 
             font-weight: bold;
-            font-family: 'Courier New', Courier, monospace;
-            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
@@ -43,7 +42,7 @@
 
         .container { max-width: 900px; margin: 0 auto; padding: 15px; }
 
-        /* NAVEGAÇÃO POR ABAS */
+        /* ABAS */
         .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; }
         .tab-btn { padding: 14px; border: none; background: #ccc; cursor: pointer; font-weight: bold; border-radius: 8px; flex: 1; font-size: 15px; transition: 0.3s; }
         .tab-btn.active { background: var(--vermelho); color: white; box-shadow: 0 4px 8px rgba(227, 6, 19, 0.3); }
@@ -54,31 +53,30 @@
 
         /* ÁREA DE BUSCA */
         .search-area { display: flex; gap: 10px; background: var(--amarelo); padding: 18px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .search-area input { flex: 1; padding: 15px; font-size: 20px; border-radius: 8px; border: none; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
-        .btn-scan { background: var(--azul); color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-size: 24px; transition: 0.2s; }
-        .btn-scan:active { transform: scale(0.95); }
+        .search-area input { flex: 1; padding: 15px; font-size: 20px; border-radius: 8px; border: none; outline: none; }
+        .btn-scan { background: var(--azul); color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-size: 24px; }
 
         /* SCANNER */
         #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 3px solid var(--azul); display: none; background: #000; }
 
-        /* TABELA DE RESULTADOS */
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        th { background: #333; color: white; padding: 12px; text-align: left; font-size: 13px; }
+        /* TABELA */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th { background: #333; color: white; padding: 12px; text-align: left; }
         td { padding: 16px; border-bottom: 1px solid #eee; }
-        .info-prod { font-weight: bold; font-size: 18px; color: #111; display: block; margin-bottom: 4px; }
+        .info-prod { font-weight: bold; font-size: 18px; color: #111; display: block; }
         .info-lab { color: #666; font-size: 14px; font-style: italic; }
-        .info-cod { font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #999; margin-top: 5px; display: block; }
+        .info-cod { font-family: 'Courier New', monospace; font-size: 12px; color: #999; margin-top: 5px; display: block; }
         .preco { color: var(--vermelho); font-weight: bold; font-size: 26px; text-align: right; }
 
-        /* ABA CADASTRO */
-        .card-adm { background: white; padding: 35px; border-radius: 12px; text-align: center; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        /* CADASTRO */
+        .card-adm { background: white; padding: 35px; border-radius: 12px; text-align: center; border: 1px solid #ddd; }
         .btn-adm { padding: 15px 25px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; margin: 10px; font-size: 16px; }
-        .last-sync { font-size: 12px; color: #666; margin-bottom: 15px; text-align: center; font-style: italic; }
+        .last-sync { font-size: 12px; color: #666; margin-bottom: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="live-clock-bar" id="relogioOnline">CARREGANDO DATA E HORA...</div>
+<div class="live-clock-bar" id="relogioOnline">CARREGANDO...</div>
 
 <div class="header">
     <img src="Souza-Farma-logomarca.png" alt="Souza Farma" class="logo">
@@ -89,7 +87,7 @@
 </div>
 
 <div class="container">
-    <div id="statusSync" class="last-sync">Sincronizando com a nuvem...</div>
+    <div id="statusSync" class="last-sync">Conectando...</div>
     
     <div class="tabs">
         <button id="btn-consulta" class="tab-btn active" onclick="mudarAba('aba-consulta')">🔎 CONSULTAR PREÇO</button>
@@ -97,35 +95,24 @@
     </div>
 
     <div id="aba-consulta" class="tab-content active">
-        <div id="reader"></div> <div class="search-area">
-            <input type="text" id="searchInput" placeholder="Nome do remédio ou código..." onkeyup="fazerBusca()">
-            <button class="btn-scan" onclick="alternarCamera()" title="Usar Câmera">📷</button>
+        <div id="reader"></div> 
+        <div class="search-area">
+            <input type="text" id="searchInput" placeholder="Busque Nome ou Código..." onkeyup="fazerBusca()">
+            <button class="btn-scan" onclick="alternarCamera()">📷</button>
         </div>
-
         <table>
-            <thead>
-                <tr>
-                    <th>PRODUTO / DETALHES</th>
-                    <th style="text-align: right;">PREÇO</th>
-                </tr>
-            </thead>
-            <tbody id="corpoTabela">
-                </tbody>
+            <tbody id="corpoTabela"></tbody>
         </table>
-        <div id="msgAviso" style="text-align: center; padding: 40px; color: #999; font-style: italic;">
-            Utilize a barra de busca acima para consultar.
-        </div>
+        <div id="msgAviso" style="text-align: center; padding: 40px; color: #999;">Aguardando busca...</div>
     </div>
 
     <div id="aba-cadastro" class="tab-content">
         <div class="card-adm">
-            <h2 style="color: var(--azul);">Painel Administrativo</h2>
-            <p>Selecione o arquivo Excel atualizado para sincronizar com todos os dispositivos.</p>
-            <br>
-            <input type="file" id="fileInput" accept=".xlsx, .xls" style="font-size: 14px;">
+            <h3>Painel Administrativo</h3>
+            <input type="file" id="fileInput" accept=".xlsx, .xls">
             <br><br>
             <button class="btn-adm" style="background: #28a745;" onclick="uploadExcelFirebase()">🚀 ATUALIZAR PREÇOS ONLINE</button>
-            <button class="btn-adm" style="background: var(--vermelho);" onclick="resetarBancoDados()">🗑️ LIMPAR BANCO ONLINE</button>
+            <button class="btn-adm" style="background: var(--vermelho);" onclick="resetarBancoDados()">🗑️ LIMPAR TUDO</button>
             <div id="feedbackUpload" style="margin-top: 15px; font-weight: bold;"></div>
         </div>
     </div>
@@ -143,177 +130,120 @@
         appId: "1:532095190012:web:3f7422c5205f4bfddbe879"
     };
 
-    // Inicialização
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let listaProdutos = [];
     let scannerObjeto;
 
-    // --- 2. RELÓGIO ONLINE EM TEMPO REAL ---
-    function iniciarRelogio() {
-        setInterval(() => {
-            const agora = new Date();
-            const formatado = agora.toLocaleDateString('pt-BR') + " | " + agora.toLocaleTimeString('pt-BR');
-            document.getElementById('relogioOnline').innerText = formatado;
-        }, 1000);
-    }
-    iniciarRelogio();
+    // --- 2. RELÓGIO ONLINE ---
+    setInterval(() => {
+        const agora = new Date();
+        document.getElementById('relogioOnline').innerText = agora.toLocaleDateString('pt-BR') + " | " + agora.toLocaleTimeString('pt-BR');
+    }, 1000);
 
-    // --- 3. SINCRONIZAÇÃO EM TEMPO REAL ---
+    // --- 3. SINCRONIZAÇÃO ---
     db.ref('/').on('value', (snapshot) => {
         const dados = snapshot.val() || {};
         listaProdutos = dados.produtos || [];
-        const dataF = dados.ultima_atualizacao || "Nunca";
-        document.getElementById('statusSync').innerText = `Última atualização da tabela: ${dataF}`;
+        document.getElementById('statusSync').innerText = `Atualizado em: ${dados.ultima_atualizacao || '---'}`;
     });
 
-    // --- 4. CONTROLE DE ABAS E SEGURANÇA ---
-    function mudarAba(idAba) {
-        if(scannerObjeto) fecharScanner(); // Fecha câmera ao mudar aba
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
-        document.getElementById(idAba).classList.add('active');
-        const btnId = 'btn-' + idAba.split('-')[1];
-        document.getElementById(btnId).classList.add('active');
+    // --- 4. SEGURANÇA E ABAS ---
+    function mudarAba(id) {
+        if(scannerObjeto) fecharScanner();
+        document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-' + id.split('-')[1]).classList.add('active');
     }
 
     function acessoSeguroCadastro() {
-        const pass = prompt("Digite a senha de administrador:");
-        if (pass === "souza123") {
-            mudarAba('aba-cadastro');
-        } else if (pass !== null) {
-            alert("Senha incorreta!");
-        }
+        if (prompt("Senha ADM:") === "souza123") mudarAba('aba-cadastro');
+        else alert("Acesso Negado.");
     }
 
-    // --- 5. LÓGICA DE BUSCA ---
-    function fazerBusca(termoManual) {
+    // --- 5. BUSCA ---
+    function fazerBusca(t) {
         const input = document.getElementById('searchInput');
-        if(termoManual) input.value = termoManual;
-        
+        if(t) input.value = t;
         const termo = input.value.toLowerCase();
         const corpo = document.getElementById('corpoTabela');
         const aviso = document.getElementById('msgAviso');
 
-        if (termo.length < 2) {
-            corpo.innerHTML = "";
-            aviso.style.display = "block";
-            return;
-        }
+        if (termo.length < 2) { corpo.innerHTML = ""; aviso.style.display = "block"; return; }
 
-        const resultados = listaProdutos.filter(p => 
-            String(p.nome).toLowerCase().includes(termo) || 
-            String(p.barras).includes(termo) ||
-            String(p.id).toLowerCase().includes(termo)
+        const res = listaProdutos.filter(p => 
+            String(p.nome).toLowerCase().includes(termo) || String(p.barras).includes(termo) || String(p.id).toLowerCase().includes(termo)
         );
 
         aviso.style.display = "none";
-        corpo.innerHTML = resultados.slice(0, 50).map(p => `
+        corpo.innerHTML = res.slice(0, 50).map(p => `
             <tr>
                 <td>
                     <span class="info-prod">${p.nome}</span>
-                    <span class="info-lab">${p.lab || 'Laboratório não informado'}</span>
-                    <span class="info-cod">Barras: ${p.barras} | ID: ${p.id}</span>
+                    <span class="info-lab">${p.lab || '-'}</span>
+                    <span class="info-cod">B: ${p.barras} | ID: ${p.id}</span>
                 </td>
                 <td class="preco">R$ ${p.preco}</td>
             </tr>
         `).join('');
     }
 
-    // --- 6. LEITOR DE CÓDIGO DE BARRAS (SCANNER) ---
+    // --- 6. SCANNER ---
     function alternarCamera() {
-        const readerDiv = document.getElementById('reader');
-        if (readerDiv.style.display === 'block') {
-            fecharScanner();
-        } else {
-            readerDiv.style.display = 'block';
+        const r = document.getElementById('reader');
+        if (r.style.display === 'block') fecharScanner();
+        else {
+            r.style.display = 'block';
             scannerObjeto = new Html5Qrcode("reader");
-            const config = { 
-                fps: 20, 
-                qrbox: { width: 300, height: 180 }, // Foco retangular para barras
-                aspectRatio: 1.0 
-            };
-            
-            scannerObjeto.start(
-                { facingMode: "environment" }, 
-                config,
-                (codigoLido) => {
-                    fazerBusca(codigoLido);
-                    fecharScanner();
-                    if(navigator.vibrate) navigator.vibrate(100);
-                }
-            ).catch(err => alert("Câmera não disponível ou permissão negada."));
+            scannerObjeto.start({ facingMode: "environment" }, { fps: 20, qrbox: { width: 300, height: 180 }, aspectRatio: 1.0 }, (txt) => {
+                fazerBusca(txt);
+                fecharScanner();
+            }).catch(e => console.error(e));
         }
     }
 
     function fecharScanner() {
-        if (scannerObjeto) {
-            scannerObjeto.stop().then(() => {
-                document.getElementById('reader').style.display = 'none';
-            });
-        }
+        if (scannerObjeto) scannerObjeto.stop().then(() => document.getElementById('reader').style.display = 'none');
     }
 
-    // --- 7. UPLOAD DE EXCEL ---
+    // --- 7. UPLOAD (CORRIGIDO PREÇO) ---
     function uploadExcelFirebase() {
-        const fileInput = document.getElementById('fileInput');
-        const feedback = document.getElementById('feedbackUpload');
-        const file = fileInput.files[0];
-
-        if (!file) return alert("Selecione um arquivo Excel (.xlsx)!");
-
-        feedback.innerHTML = "⏳ Processando dados, aguarde...";
-        feedback.style.color = "orange";
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) return alert("Selecione o arquivo!");
 
         const leitor = new FileReader();
         leitor.onload = function(e) {
-            try {
-                const dadosArray = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(dadosArray, {type: 'array'});
-                const planilha = workbook.Sheets[workbook.SheetNames[0]];
-                const rawJson = XLSX.utils.sheet_to_json(planilha);
+            const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
 
-                const listaFinal = rawJson.map(item => {
-                    const buscaColuna = (listaNomes) => {
-                        const chaveEncontrada = Object.keys(item).find(k => listaNomes.includes(k.toLowerCase().trim()));
-                        return chaveEncontrada ? item[chaveEncontrada] : "";
-                    };
-                    return {
-                        nome: buscaColuna(['nome', 'produto', 'descricao', 'item']),
-                        lab: buscaColuna(['laboratorio', 'lab', 'fabricante', 'marca']),
-                        barras: buscaColuna(['codigo_barras', 'barras', 'ean', 'cod_barras']),
-                        id: buscaColuna(['codigo_interno', 'id', 'codigo', 'cod']),
-                        preco: buscaColuna(['preco', 'valor', 'venda', 'preço'])
-                    };
-                });
+            const listaFinal = json.map(item => {
+                const getV = (n) => {
+                    const k = Object.keys(item).find(x => n.includes(x.toLowerCase().trim()));
+                    return k ? item[k] : "";
+                };
 
-                const agora = new Date();
-                const timestamp = agora.toLocaleDateString('pt-BR') + " " + agora.toLocaleTimeString('pt-BR');
+                // Lógica de Limpeza de Preço
+                let pBruto = String(getV(['preco', 'valor', 'venda', 'preço'])).replace('R$', '').trim();
+                if (!pBruto.includes(',') && !pBruto.includes('.')) pBruto += ",00";
 
-                db.ref('/').set({
-                    produtos: listaFinal,
-                    ultima_atualizacao: timestamp
-                }).then(() => {
-                    feedback.innerHTML = "✅ Dados sincronizados com sucesso na nuvem!";
-                    feedback.style.color = "green";
-                    fileInput.value = "";
-                });
+                return {
+                    nome: getV(['nome', 'produto', 'descricao']),
+                    lab: getV(['laboratorio', 'lab', 'fabricante']),
+                    barras: getV(['codigo_barras', 'barras', 'ean']),
+                    id: getV(['codigo_interno', 'id', 'codigo']),
+                    preco: pBruto
+                };
+            });
 
-            } catch (erro) {
-                feedback.innerHTML = "❌ Erro ao ler Excel. Verifique o formato.";
-                feedback.style.color = "red";
-            }
+            db.ref('/').set({ produtos: listaFinal, ultima_atualizacao: new Date().toLocaleString('pt-BR') })
+              .then(() => alert("Sincronizado!"));
         };
         leitor.readAsArrayBuffer(file);
     }
 
     function resetarBancoDados() {
-        if (confirm("ATENÇÃO: Isso removerá todos os preços de todos os aparelhos. Confirma?")) {
-            db.ref('/').remove().then(() => alert("Banco de dados esvaziado."));
-        }
+        if (confirm("Limpar nuvem?")) db.ref('/').remove();
     }
 </script>
-
 </body>
 </html>
