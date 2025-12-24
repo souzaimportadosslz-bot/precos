@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOUZA FARMA - Consulta Online</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    
+    <style>
+        :root { --vermelho: #e30613; --amarelo: #ffca05; --azul: #003399; --cinza: #f4f4f4; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--cinza); padding-bottom: 50px; }
+        
+        /* CABEÇALHO */
+        .header { background: white; text-align: center; padding: 20px; border-bottom: 6px solid var(--vermelho); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .logo { max-width: 180px; margin-bottom: 10px; }
+        .header h1 { color: var(--vermelho); margin: 5px 0; font-size: 26px; }
+        .header p { margin: 2px 0; color: #333; font-size: 14px; }
+        .slogan { font-weight: bold; color: var(--azul); margin-top: 8px !important; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 15px; }
+
+        /* NAVEGAÇÃO */
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 8px; }
+        .tab-btn { padding: 12px 20px; border: none; background: #ccc; cursor: pointer; font-weight: bold; border-radius: 5px; flex: 1; max-width: 200px; }
+        .tab-btn.active { background: var(--vermelho); color: white; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* CONSULTA */
+        .search-box { background: var(--amarelo); padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .search-box input { width: 100%; padding: 15px; font-size: 20px; border-radius: 5px; border: none; box-sizing: border-box; outline: none; }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        td { padding: 15px; border-bottom: 1px solid #ddd; }
+        .info-prod { font-weight: bold; font-size: 18px; display: block; }
+        .info-lab { color: #666; font-size: 13px; font-style: italic; }
+        .info-cod { font-family: monospace; font-size: 12px; color: #888; }
+        .preco { color: var(--vermelho); font-weight: bold; font-size: 24px; text-align: right; white-space: nowrap; }
+
+        /* CADASTRO */
+        .card-adm { background: white; padding: 30px; border-radius: 10px; border: 1px solid #ddd; text-align: center; }
+        .btn { padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; margin: 10px; }
+        .status-sync { font-size: 13px; color: #666; margin-bottom: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="Souza-Farma-logomarca.png" alt="Souza Farma" class="logo">
+    <h1>SOUZA FARMA</h1>
+    <p>Farmácia do Trabalhador | CNPJ 45.856.880/0001-30</p>
+    <p>Av. José Sarney nº 06, Bom Jesus – São Luís/MA</p>
+    <p class="slogan">Cuidando da sua saúde, economia e preço baixo 💊💉</p>
+</div>
+
+<div class="container">
+    <div id="conexaoTexto" class="status-sync">📡 Conectando ao banco de dados...</div>
+    
+    <div class="tabs">
+        <button id="btn-consulta" class="tab-btn active" onclick="mudarAba('aba-consulta')">🔎 CONSULTA</button>
+        <button id="btn-cadastro" class="tab-btn" onclick="acessarCadastro()">⚙️ CADASTRO</button>
+    </div>
+
+    <div id="aba-consulta" class="tab-content active">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Nome, Código de Barras ou Interno..." onkeyup="buscar()">
+        </div>
+        <table>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+        <div id="msgAviso" style="text-align: center; padding: 20px; color: #888;">Digite para iniciar a busca.</div>
+    </div>
+
+    <div id="aba-cadastro" class="tab-content">
+        <div class="card-adm">
+            <h3>Gerenciamento Online (Firebase)</h3>
+            <p>Sua lista de preços será atualizada em todos os aparelhos conectados.</p>
+            <input type="file" id="fileInput" accept=".xlsx, .xls">
+            <br><br>
+            <button class="btn" style="background: #28a745;" onclick="uploadParaFirebase()">🚀 Atualizar Preços Online</button>
+            <button class="btn" style="background: #e30613;" onclick="limparFirebase()">🗑️ Limpar Banco de Dados</button>
+            <div id="uploadStatus" style="margin-top: 15px; font-weight: bold;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuração do seu Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRWJLxxDIhtOV3YVjX9qYCHYhsDYhsC9M",
+        authDomain: "souza-farma-f6b8f.firebaseapp.com",
+        databaseURL: "https://souza-farma-f6b8f-default-rtdb.firebaseio.com",
+        projectId: "souza-farma-f6b8f",
+        storageBucket: "souza-farma-f6b8f.firebasestorage.app",
+        messagingSenderId: "532095190012",
+        appId: "1:532095190012:web:3f7422c5205f4bfddbe879"
+    };
+
+    // Inicialização
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let listaProdutos = [];
+
+    // Escuta em tempo real: Quando o banco mudar, todos os dispositivos recebem
+    db.ref('produtos').on('value', (snapshot) => {
+        listaProdutos = snapshot.val() || [];
+        document.getElementById('conexaoTexto').innerText = `✅ Sistema Online: ${listaProdutos.length} itens disponíveis.`;
+    });
+
+    function mudarAba(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-' + id.split('-')[1]).classList.add('active');
+    }
+
+    function acessarCadastro() {
+        if (prompt("Digite a senha de administrador:") === "souza123") {
+            mudarAba('aba-cadastro');
+        } else {
+            alert("Senha incorreta.");
+        }
+    }
+
+    function buscar() {
+        const termo = document.getElementById('searchInput').value.toLowerCase();
+        const corpo = document.getElementById('corpoTabela');
+        const aviso = document.getElementById('msgAviso');
+
+        if (termo.length < 2) {
+            corpo.innerHTML = "";
+            aviso.style.display = "block";
+            return;
+        }
+
+        const resultados = listaProdutos.filter(p => 
+            String(p.nome).toLowerCase().includes(termo) || 
+            String(p.barras).includes(termo) || 
+            String(p.id).toLowerCase().includes(termo)
+        );
+
+        aviso.style.display = "none";
+        corpo.innerHTML = resultados.slice(0, 50).map(p => `
+            <tr>
+                <td>
+                    <span class="info-prod">${p.nome}</span>
+                    <span class="info-lab">${p.lab || '-'}</span><br>
+                    <span class="info-cod">ID: ${p.id} | B: ${p.barras}</span>
+                </td>
+                <td class="preco">R$ ${p.preco}</td>
+            </tr>
+        `).join('');
+    }
+
+    function uploadParaFirebase() {
+        const file = document.getElementById('fileInput').files[0];
+        const status = document.getElementById('uploadStatus');
+        if (!file) return alert("Selecione um arquivo Excel!");
+
+        status.innerText = "⏳ Processando...";
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+
+            const formatados = json.map(item => {
+                const getV = (keys) => {
+                    const k = Object.keys(item).find(key => keys.includes(key.toLowerCase().trim()));
+                    return k ? item[k] : "";
+                };
+                return {
+                    nome: getV(['nome', 'produto', 'descricao']),
+                    lab: getV(['laboratorio', 'lab', 'fabricante']),
+                    barras: getV(['codigo_barras', 'barras', 'ean']),
+                    id: getV(['codigo_interno', 'id', 'codigo']),
+                    preco: getV(['preco', 'valor', 'venda'])
+                };
+            });
+
+            db.ref('produtos').set(formatados)
+                .then(() => {
+                    status.innerHTML = "✅ Sincronizado com Sucesso!";
+                    document.getElementById('fileInput').value = "";
+                })
+                .catch(err => status.innerText = "❌ Erro: " + err);
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function limparFirebase() {
+        if (confirm("Isso apagará os preços de TODOS os celulares e computadores. Confirma?")) {
+            db.ref('produtos').remove();
+        }
+    }
+</script>
+
+</body>
+</html>
